@@ -27,7 +27,12 @@ exports.postSurvey = async (req, res) => {
     res.redirect(`/game?level=${level}`);
   } catch (error) {
     console.error('Error saving survey:', error);
-    res.status(500).send('เกิดข้อผิดพลาดในการบันทึกข้อมูล');
+    // In production we send generic message but log full error
+    if (process.env.NODE_ENV === 'production') {
+      res.status(500).send('เกิดข้อผิดพลาดในการบันทึกข้อมูล');
+    } else {
+      res.status(500).send(`Error saving survey: ${error.message}`);
+    }
   }
 };
 
