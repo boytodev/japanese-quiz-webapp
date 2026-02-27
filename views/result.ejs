@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ผลคะแนน - เกมควิซภาษาญี่ปุ่น</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-image: url('/images/bg2.jpg');
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+      position: relative;
+      transition: background 0.5s ease;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      opacity: 0;
+      transition: opacity 1s ease;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    body.has-background::before {
+      opacity: 1;
+    }
+
+    .container {
+      text-align: center;
+      background: rgba(0, 0, 0, 0.35);
+      backdrop-filter: blur(5px);
+      -webkit-backdrop-filter: blur(5px);
+      padding: 60px 80px;
+      border-radius: 30px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+      animation: fadeIn 0.8s ease;
+      max-width: 600px;
+      border: 2px solid rgba(255, 255, 255, 0.6);
+      position: relative;
+      z-index: 1;
+    }
+
+    .overlay {
+      background-color: rgba(255,255,255,0.85);
+      color: #333;
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+      box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: scale(0.9);
+      }
+      to {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+
+    h1 {
+      color: #a67c52;
+      font-size: 2.5em;
+      margin-bottom: 30px;
+      text-shadow: 3px 3px 10px rgba(0, 0, 0, 0.7);
+      font-weight: 700;
+    }
+
+    .score-circle {
+      width: 200px;
+      height: 200px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, rgba(166, 124, 82, 0.8) 0%, rgba(133, 109, 77, 0.8) 100%);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      margin: 0 auto 30px;
+      box-shadow: 0 10px 40px rgba(166, 124, 82, 0.4);
+      animation: pulse 2s ease infinite;
+      border: 3px solid rgba(255, 255, 255, 0.6);
+    }
+
+    @keyframes pulse {
+      0%, 100% {
+        transform: scale(1);
+      }
+      50% {
+        transform: scale(1.05);
+      }
+    }
+
+    .score-number {
+      font-size: 4em;
+      color: white;
+      font-weight: bold;
+      line-height: 1;
+      text-shadow: 3px 3px 8px rgba(0, 0, 0, 0.5);
+    }
+
+    .score-total {
+      font-size: 1.5em;
+      color: rgba(255, 255, 255, 0.95);
+      text-shadow: 2px 2px 6px rgba(0, 0, 0, 0.5);
+    }
+
+    .percentage {
+      font-size: 1.8em;
+      color: rgba(255, 255, 255, 1);
+      margin-bottom: 20px;
+      font-weight: 600;
+      text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.7);
+    }
+
+    .message {
+      font-size: 1.3em;
+      color: rgba(255, 255, 255, 1);
+      margin-bottom: 40px;
+      line-height: 1.6;
+      padding: 20px;
+      background: rgba(0, 0, 0, 0.25);
+      backdrop-filter: blur(5px);
+      -webkit-backdrop-filter: blur(5px);
+      border-radius: 15px;
+      border: 2px solid rgba(255, 255, 255, 0.5);
+      text-shadow: 2px 2px 6px rgba(0, 0, 0, 0.7);
+      font-weight: 500;
+    }
+
+    .emoji {
+      font-size: 3em;
+      margin-bottom: 20px;
+    }
+
+    .home-btn {
+      background: linear-gradient(135deg, rgba(166, 124, 82, 0.8) 0%, rgba(133, 109, 77, 0.8) 100%);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      color: white;
+      border: 2px solid rgba(255, 255, 255, 0.6);
+      padding: 15px 50px;
+      font-size: 1.2em;
+      border-radius: 50px;
+      cursor: pointer;
+      transition: all 0.3s;
+      text-decoration: none;
+      display: inline-block;
+      box-shadow: 0 10px 30px rgba(166, 124, 82, 0.4);
+      font-weight: 600;
+      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+    }
+
+    .home-btn:hover {
+      transform: translateY(-3px) scale(1.05);
+      box-shadow: 0 15px 40px rgba(255, 255, 255, 0.4);
+      background: linear-gradient(135deg, rgba(166, 124, 82, 0.9) 0%, rgba(133, 109, 77, 0.9) 100%);
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+      body {
+        padding: 15px;
+      }
+
+      .container {
+        padding: 40px 30px;
+        max-width: 500px;
+      }
+
+      h1 {
+        font-size: 2em;
+        margin-bottom: 25px;
+      }
+
+      .score-circle {
+        width: 160px;
+        height: 160px;
+        margin-bottom: 25px;
+      }
+
+      .score-number {
+        font-size: 3em;
+      }
+
+      .score-total {
+        font-size: 1.3em;
+      }
+
+      .percentage {
+        font-size: 1.5em;
+        margin-bottom: 15px;
+      }
+
+      .emoji {
+        font-size: 2.5em;
+        margin-bottom: 15px;
+      }
+
+      .message {
+        font-size: 1.1em;
+        margin-bottom: 30px;
+        padding: 15px;
+      }
+
+      .home-btn {
+        padding: 12px 40px;
+        font-size: 1.1em;
+      }
+    }
+
+    @media (max-width: 480px) {
+      body {
+        padding: 10px;
+      }
+
+      .container {
+        padding: 30px 20px;
+        max-width: 100%;
+      }
+
+      h1 {
+        font-size: 1.6em;
+        margin-bottom: 20px;
+      }
+
+      .score-circle {
+        width: 140px;
+        height: 140px;
+        margin-bottom: 20px;
+      }
+
+      .score-number {
+        font-size: 2.5em;
+      }
+
+      .score-total {
+        font-size: 1.1em;
+      }
+
+      .percentage {
+        font-size: 1.3em;
+        margin-bottom: 12px;
+      }
+
+      .emoji {
+        font-size: 2em;
+        margin-bottom: 12px;
+      }
+
+      .message {
+        font-size: 1em;
+        margin-bottom: 25px;
+        padding: 12px;
+      }
+
+      .home-btn {
+        padding: 12px 35px;
+        font-size: 1em;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container overlay">
+    <h1>🎊 ผลคะแนนของคุณ</h1>
+    
+    <div class="score-circle">
+      <div class="score-number"><%= score %></div>
+      <div class="score-total">/ <%= total %></div>
+    </div>
+
+    <div class="percentage">
+      <%= Math.round((score / total) * 100) %>%
+    </div>
+
+    <% 
+      let emoji = '🎉';
+      const percentage = (score / total) * 100;
+      if (percentage >= 80) {
+        emoji = '🎉';
+      } else if (percentage >= 60) {
+        emoji = '👍';
+      } else {
+        emoji = '💪';
+      }
+    %>
+
+    <div class="emoji"><%= emoji %></div>
+
+    <div class="message">
+      <%= message %>
+    </div>
+
+    <a href="/" class="home-btn">🏠 กลับหน้าแรก</a>
+  </div>
+  <script>
+    // ดึงคะแนนจาก URL และตั้งค่าพื้นหลัง
+    const urlParams = new URLSearchParams(window.location.search);
+    const score = parseInt(urlParams.get('score')) || 0;
+    
+    // รูปพื้นหลังตามคะแนน (เหมือนหน้าเกม)
+    const backgrounds = [
+      '/images/bg1.png',  // 0-5 คะแนน
+      '/images/bg2.jpg',  // 6-10 คะแนน
+      '/images/bg3.png',  // 11-15 คะแนน
+      '/images/bg4.png',  // 16-20 คะแนน
+      '/images/bg5.png',  // 21-25 คะแนน
+      '/images/bg6.png',  // 26-30 คะแนน
+      '/images/bg7.png',  // 31-35 คะแนน
+      '/images/bg8.png',  // 36-40 คะแนน
+      '/images/bg9.png',  // 41-45 คะแนน
+      '/images/bg10.png'  // 46+ คะแนน
+    ];
+    
+    // ตั้งค่าพื้นหลังตามคะแนน
+    const bgIndex = Math.min(Math.floor(score / 5), backgrounds.length - 1);
+    const bgUrl = backgrounds[bgIndex];
+    
+    document.body.style.backgroundImage = `url('${bgUrl}')`;
+    document.body.style.backgroundSize = 'cover';
+    document.body.style.backgroundPosition = 'center';
+    document.body.style.backgroundAttachment = 'fixed';
+    document.body.classList.add('has-background');
+  </script>
+</body>
+</html>

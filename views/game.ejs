@@ -1,0 +1,754 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>เกมควิซ</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #f8f1e4 0%, #e1d7c6 100%);
+      min-height: 100vh;
+      padding: 40px 20px;
+      position: relative;
+      transition: background 0.5s ease;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      opacity: 0;
+      transition: opacity 1s ease;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    body.has-background::before {
+      opacity: 1;
+    }
+
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 40px 20px;
+      position: relative;
+      z-index: 1;
+    }
+
+    h1 {
+      color: #a67c52;
+      text-align: center;
+      margin-bottom: 30px;
+      font-size: 3em;
+      text-shadow: 4px 4px 15px rgba(0, 0, 0, 0.8);
+      font-weight: 700;
+      letter-spacing: 2px;
+    }
+
+    .score-header {
+      text-align: center;
+      margin-bottom: 30px;
+      padding: 20px;
+      background: rgba(0, 0, 0, 0.4);
+      backdrop-filter: blur(5px);
+      -webkit-backdrop-filter: blur(5px);
+      border-radius: 25px;
+      color: white;
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+      border: 2px solid rgba(255, 255, 255, 0.6);
+    }
+
+    .score-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .score-label {
+      font-size: 0.9em;
+      opacity: 0.95;
+      margin-bottom: 5px;
+      text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.3);
+    }
+
+    .score-value {
+      font-size: 1.8em;
+      font-weight: bold;
+      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+    }
+
+    .correct-animation {
+      animation: correctPulse 0.5s ease;
+    }
+
+    @keyframes correctPulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.1); color: #856d4d; }
+    }
+
+    .progress-bar {
+      width: 100%;
+      height: 12px;
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: 15px;
+      margin-bottom: 30px;
+      overflow: hidden;
+      backdrop-filter: blur(5px);
+      -webkit-backdrop-filter: blur(5px);
+      border: 2px solid rgba(255, 255, 255, 0.6);
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    }
+
+    .progress {
+      height: 100%;
+      background: linear-gradient(90deg, rgba(255, 255, 255, 0.9) 0%, rgba(255, 255, 255, 1) 100%);
+      width: 0%;
+      transition: width 0.3s ease;
+      box-shadow: 0 0 25px rgba(255, 255, 255, 0.9);
+    }
+
+    .question-card {
+      display: none;
+      animation: slideIn 0.5s ease;
+      background: rgba(0, 0, 0, 0.3);
+      padding: 30px;
+      border-radius: 25px;
+      backdrop-filter: blur(5px);
+      -webkit-backdrop-filter: blur(5px);
+      border: 2px solid rgba(255, 255, 255, 0.6);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    }
+
+    .question-card.active {
+      display: block;
+    }
+
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: translateX(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+
+    .question-number {
+      color: rgba(255, 255, 255, 1);
+      font-size: 1.3em;
+      margin-bottom: 20px;
+      font-weight: 600;
+      text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.8);
+    }
+
+    .question-text {
+      font-size: 1.6em;
+      color: rgba(255, 255, 255, 1);
+      margin-bottom: 30px;
+      line-height: 1.7;
+      text-shadow: 3px 3px 10px rgba(0, 0, 0, 0.9);
+      font-weight: 600;
+    }
+
+    .options {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+
+    .option {
+      padding: 20px;
+      border: 2px solid rgba(255, 255, 255, 0.7);
+      border-radius: 15px;
+      cursor: pointer;
+      transition: all 0.3s;
+      font-size: 1.1em;
+      background: rgba(0, 0, 0, 0.25);
+      backdrop-filter: blur(5px);
+      -webkit-backdrop-filter: blur(5px);
+      color: rgba(255, 255, 255, 1);
+      font-weight: 600;
+      text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.8);
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    }
+
+    .option:hover {
+      background: rgba(255, 255, 255, 0.2);
+      border-color: rgba(255, 255, 255, 0.9);
+      transform: translateX(5px) scale(1.02);
+      box-shadow: 0 6px 25px rgba(255, 255, 255, 0.3);
+    }
+
+    .option.selected {
+      background: #a67c52;
+      color: white;
+      border-color: #856d4d;
+    }
+
+    .option.correct {
+      background: rgba(76, 175, 80, 0.85);
+      color: white;
+      border-color: rgba(76, 175, 80, 0.9);
+      animation: correctShake 0.5s ease;
+      backdrop-filter: blur(5px);
+      -webkit-backdrop-filter: blur(5px);
+      text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.3);
+    }
+
+    .option.wrong {
+      background: rgba(244, 67, 54, 0.85);
+      color: white;
+      border-color: rgba(244, 67, 54, 0.9);
+      animation: wrongShake 0.5s ease;
+      backdrop-filter: blur(5px);
+      -webkit-backdrop-filter: blur(5px);
+      text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.3);
+    }
+
+    @keyframes correctShake {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-5px); }
+      75% { transform: translateX(5px); }
+    }
+
+    @keyframes wrongShake {
+      0%, 100% { transform: translateX(0); }
+      10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+      20%, 40%, 60%, 80% { transform: translateX(5px); }
+    }
+
+    .nav-buttons {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 30px;
+    }
+
+    .btn {
+      padding: 12px 30px;
+      border: none;
+      border-radius: 8px;
+      font-size: 1.1em;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .btn-prev {
+      background: #e0e0e0;
+      color: #333;
+    }
+
+    .btn-prev:hover {
+      background: #d0d0d0;
+    }
+
+    .btn-next {
+      background: linear-gradient(135deg, #a67c52 0%, #856d4d 100%);
+      color: white;
+    }
+
+    .btn-next:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 20px rgba(166, 124, 82, 0.4);
+    }
+
+    .btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .score-display {
+      text-align: center;
+      font-size: 1.2em;
+      color: #a67c52;
+      margin-top: 20px;
+    }
+
+    .loading {
+      text-align: center;
+      padding: 60px 20px;
+      font-size: 1.5em;
+      color: #a67c52;
+    }
+
+    .loading::after {
+      content: '...';
+      animation: dots 1.5s steps(4, end) infinite;
+    }
+
+    @keyframes dots {
+      0%, 20% { content: '.'; }
+      40% { content: '..'; }
+      60%, 100% { content: '...'; }
+    }
+
+    .bg-change-notification {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: linear-gradient(135deg, #a67c52 0%, #856d4d 100%);
+      color: white;
+      padding: 15px 25px;
+      border-radius: 10px;
+      font-size: 1.1em;
+      font-weight: bold;
+      box-shadow: 0 5px 20px rgba(76, 175, 80, 0.5);
+      z-index: 1000;
+      animation: slideInRight 0.5s ease, fadeOut 0.5s ease 2.5s forwards;
+    }
+
+    @keyframes slideInRight {
+      from {
+        transform: translateX(400px);
+        opacity: 0;
+      }
+      to {
+        transform: translateX(0);
+        opacity: 1;
+      }
+    }
+
+    @keyframes fadeOut {
+      to {
+        opacity: 0;
+        transform: translateX(400px);
+      }
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+      body {
+        padding: 20px 10px;
+      }
+
+      .container {
+        padding: 20px 15px;
+      }
+
+      h1 {
+        font-size: 2em;
+        margin-bottom: 20px;
+        letter-spacing: 1px;
+      }
+
+      .score-header {
+        padding: 12px;
+        margin-bottom: 20px;
+        flex-direction: row;
+        gap: 10px;
+      }
+
+      .score-item {
+        flex: 1;
+      }
+
+      .score-label {
+        font-size: 0.75em;
+      }
+
+      .score-value {
+        font-size: 1.4em;
+      }
+
+      .question-card {
+        padding: 20px 15px;
+      }
+
+      .question-number {
+        font-size: 1em;
+        margin-bottom: 15px;
+      }
+
+      .question-text {
+        font-size: 1.2em;
+        margin-bottom: 20px;
+        line-height: 1.5;
+      }
+
+      .option {
+        padding: 15px;
+        font-size: 1em;
+      }
+
+      .option:hover {
+        transform: translateX(3px) scale(1.01);
+      }
+
+      .progress-bar {
+        height: 10px;
+        margin-bottom: 20px;
+      }
+
+      .bg-change-notification {
+        top: 10px;
+        right: 10px;
+        padding: 10px 15px;
+        font-size: 0.9em;
+      }
+    }
+
+    @media (max-width: 480px) {
+      body {
+        padding: 15px 5px;
+      }
+
+      .container {
+        padding: 15px 10px;
+      }
+
+      h1 {
+        font-size: 1.6em;
+        margin-bottom: 15px;
+      }
+
+      .score-header {
+        padding: 10px;
+        margin-bottom: 15px;
+        border-radius: 15px;
+      }
+
+      .score-label {
+        font-size: 0.7em;
+      }
+
+      .score-value {
+        font-size: 1.2em;
+      }
+
+      .question-card {
+        padding: 15px 10px;
+        border-radius: 15px;
+      }
+
+      .question-number {
+        font-size: 0.9em;
+        margin-bottom: 12px;
+      }
+
+      .question-text {
+        font-size: 1.1em;
+        margin-bottom: 15px;
+      }
+
+      .options {
+        gap: 10px;
+      }
+
+      .option {
+        padding: 12px;
+        font-size: 0.95em;
+        border-radius: 12px;
+      }
+
+      .progress-bar {
+        height: 8px;
+        margin-bottom: 15px;
+      }
+
+      .bg-change-notification {
+        top: 5px;
+        right: 5px;
+        padding: 8px 12px;
+        font-size: 0.8em;
+        border-radius: 8px;
+      }
+    }
+
+    @media (min-width: 769px) and (max-width: 1024px) {
+      .container {
+        max-width: 700px;
+      }
+
+      h1 {
+        font-size: 2.5em;
+      }
+
+      .question-text {
+        font-size: 1.4em;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🎯 Japanese Quiz</h1>
+    
+    <div class="score-header">
+      <div class="score-item">
+        <div class="score-label">คะแนน</div>
+        <div class="score-value" id="currentScore">0</div>
+      </div>
+      <div class="score-item">
+        <div class="score-label">ตอบถูก</div>
+        <div class="score-value" id="correctCount">0</div>
+      </div>
+      <div class="score-item">
+        <div class="score-label">ตอบผิด</div>
+        <div class="score-value" id="wrongCount">0</div>
+      </div>
+    </div>
+    
+    <div class="progress-bar">
+      <div class="progress" id="progressBar"></div>
+    </div>
+
+    <div id="quizContainer">
+      <div class="loading">กำลังโหลดคำถาม</div>
+    </div>
+
+    <div class="nav-buttons" id="navButtons" style="display: none;">
+      <button class="btn btn-prev" id="prevBtn" onclick="prevQuestion()">← ก่อนหน้า</button>
+      <button class="btn btn-next" id="nextBtn" onclick="nextQuestion()">ถัดไป →</button>
+    </div>
+
+    <div class="score-display" id="scoreDisplay"></div>
+  </div>
+
+  <script>
+    let quizData = [];
+    let currentQuestion = 0;
+    let userAnswers = [];
+    let selectedLevel = '';
+    let currentScore = 0;
+    let correctAnswers = 0;
+    let wrongAnswers = 0;
+    let isAnswered = false;
+
+    // ดึง level จาก URL
+    const urlParams = new URLSearchParams(window.location.search);
+    selectedLevel = urlParams.get('level') || 'N5';
+
+    // รูปพื้นหลังตามคะแนน (เปลี่ยนทุก 5 คะแนน)
+    const backgrounds = [
+      '/images/bg1.png',  // 0-5 คะแนน
+      '/images/bg2.jpg',  // 6-10 คะแนน
+      '/images/bg3.png',  // 11-15 คะแนน
+      '/images/bg4.png',  // 16-20 คะแนน
+      '/images/bg5.png',  // 21-25 คะแนน
+      '/images/bg6.png',  // 26-30 คะแนน
+      '/images/bg7.png',  // 31-35 คะแนน
+      '/images/bg8.png',  // 36-40 คะแนน
+      '/images/bg9.png',  // 41-45 คะแนน
+      '/images/bg10.png'  // 46+ คะแนน
+    ];
+
+    // โหลดข้อมูลจาก questions.json
+    async function loadQuestions() {
+      try {
+        const response = await fetch('/questions.json');
+        const allQuestions = await response.json();
+        
+        // กรองคำถามตาม level
+        if (selectedLevel === 'ALL') {
+          quizData = shuffleArray(allQuestions); // ใช้ทั้งหมดแบบสุ่ม
+        } else {
+          const filtered = allQuestions.filter(q => q.level === selectedLevel);
+          quizData = shuffleArray(filtered); // ใช้ทั้งหมดตาม level แบบสุ่ม
+        }
+        
+        // แปลง answer จาก 1-based เป็น 0-based
+        quizData = quizData.map(q => ({
+          ...q,
+          correct: q.answer - 1
+        }));
+        
+        userAnswers = new Array(quizData.length).fill(null);
+        
+        // แสดงปุ่มนำทาง
+        document.getElementById('navButtons').style.display = 'flex';
+        
+        // ตั้งค่าพื้นหลังเริ่มต้น
+        updateBackground();
+        
+        renderQuiz();
+      } catch (error) {
+        console.error('Error loading questions:', error);
+        document.getElementById('quizContainer').innerHTML = '<div class="loading" style="color: red;">ไม่สามารถโหลดคำถามได้ กรุณาลองใหม่อีกครั้ง</div>';
+      }
+    }
+
+    // ฟังก์ชันสุ่มข้อมูล
+    function shuffleArray(array) {
+      const newArray = [...array];
+      for (let i = newArray.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
+      }
+      return newArray;
+    }
+
+    function renderQuiz() {
+      if (quizData.length === 0) return;
+      
+      const container = document.getElementById('quizContainer');
+      container.innerHTML = '';
+
+      quizData.forEach((q, index) => {
+        const card = document.createElement('div');
+        card.className = 'question-card' + (index === currentQuestion ? ' active' : '');
+        
+        const levelBadge = `<span style="background: ${q.level === 'N5' ? '#a67c52' : '#856d4d'}; color: white; padding: 4px 12px; border-radius: 12px; font-size: 0.9em; margin-left: 10px;">${q.level}</span>`;
+        
+        card.innerHTML = `
+          <div class="question-number">คำถามที่ ${index + 1} จาก ${quizData.length} ${levelBadge}</div>
+          <div class="question-text">${q.question}</div>
+          <div class="options">
+            ${q.options.map((opt, i) => `
+              <div class="option" onclick="selectAnswer(${index}, ${i})">
+                ${String.fromCharCode(65 + i)}. ${opt}
+              </div>
+            `).join('')}
+          </div>
+        `;
+        
+        container.appendChild(card);
+      });
+
+      updateProgress();
+      updateButtons();
+    }
+
+    function selectAnswer(questionIndex, optionIndex) {
+      if (isAnswered) return; // ป้องกันคลิกซ้ำ
+      
+      isAnswered = true;
+      userAnswers[questionIndex] = optionIndex;
+      
+      const isCorrect = optionIndex === quizData[questionIndex].correct;
+      
+      // อัพเดทคะแนน
+      if (isCorrect) {
+        currentScore++;
+        correctAnswers++;
+        updateScoreDisplay();
+        updateBackground();
+        showFeedback(questionIndex, optionIndex, true);
+      } else {
+        wrongAnswers++;
+        updateScoreDisplay();
+        showFeedback(questionIndex, optionIndex, false);
+      }
+      
+      // รอ 1.5 วินาที แล้วไปข้อถัดไปหรือส่งคำตอบ
+      setTimeout(() => {
+        isAnswered = false;
+        if (currentQuestion < quizData.length - 1) {
+          currentQuestion++;
+          renderQuiz();
+        } else {
+          // ข้อสุดท้าย ส่งคำตอบทันที
+          submitQuiz();
+        }
+      }, 1500);
+    }
+
+    function showFeedback(questionIndex, selectedOption, isCorrect) {
+      const options = document.querySelectorAll('.question-card.active .option');
+      const correctOption = quizData[questionIndex].correct;
+      
+      options[selectedOption].classList.add(isCorrect ? 'correct' : 'wrong');
+      
+      if (!isCorrect) {
+        options[correctOption].classList.add('correct');
+      }
+    }
+
+    function updateScoreDisplay() {
+      document.getElementById('currentScore').textContent = currentScore;
+      document.getElementById('correctCount').textContent = correctAnswers;
+      document.getElementById('wrongCount').textContent = wrongAnswers;
+      
+      // Animation
+      document.getElementById('currentScore').classList.add('correct-animation');
+      setTimeout(() => {
+        document.getElementById('currentScore').classList.remove('correct-animation');
+      }, 500);
+    }
+
+    function updateBackground() {
+      // เปลี่ยนพื้นหลังทุก 5 คะแนน (0-5, 6-10, 11-15, ...)
+      const bgIndex = Math.min(Math.floor(currentScore / 5), backgrounds.length - 1);
+      const bgUrl = backgrounds[bgIndex];
+      
+      // ตรวจสอบว่าพื้นหลังเปลี่ยนหรือไม่
+      const currentBg = document.body.style.backgroundImage;
+      const newBg = `url("${bgUrl}")`;
+      
+      if (currentBg !== newBg) {
+        document.body.style.backgroundImage = newBg;
+        document.body.style.backgroundSize = 'cover';
+        document.body.style.backgroundPosition = 'center';
+        document.body.style.backgroundAttachment = 'fixed';
+        document.body.classList.add('has-background');
+        
+        // แสดงการแจ้งเตือนเมื่อพื้นหลังเปลี่ยน (ยกเว้นครั้งแรก)
+        if (currentScore >= 5) {
+          showBackgroundChangeNotification();
+        }
+      }
+    }
+
+    function showBackgroundChangeNotification() {
+      const notification = document.createElement('div');
+      notification.className = 'bg-change-notification';
+      notification.textContent = '🎉 ระดับใหม่! พื้นหลังเปลี่ยนแล้ว!';
+      document.body.appendChild(notification);
+      
+      setTimeout(() => {
+        notification.remove();
+      }, 3000);
+    }
+
+    function updateProgress() {
+      const progress = ((currentQuestion + 1) / quizData.length) * 100;
+      document.getElementById('progressBar').style.width = progress + '%';
+    }
+
+    function updateButtons() {
+      const prevBtn = document.getElementById('prevBtn');
+      const nextBtn = document.getElementById('nextBtn');
+
+      prevBtn.style.display = 'none'; // ซ่อนปุ่มย้อนกลับ
+      nextBtn.style.display = 'none'; // ซ่อนปุ่มถัดไป (ระบบจะเปลี่ยนข้ออัตโนมัติ)
+    }
+
+    function prevQuestion() {
+      if (currentQuestion > 0 && !isAnswered) {
+        currentQuestion--;
+        renderQuiz();
+      }
+    }
+
+    function nextQuestion() {
+      if (currentQuestion < quizData.length - 1 && !isAnswered) {
+        currentQuestion++;
+        renderQuiz();
+      }
+    }
+
+    function submitQuiz() {
+      // Redirect ไปหน้า result พร้อมคะแนน
+      window.location.href = `/result?score=${currentScore}&total=${quizData.length}`;
+    }
+
+    // เริ่มต้น - โหลดคำถามก่อน
+    loadQuestions();
+  </script>
+</body>
+</html>

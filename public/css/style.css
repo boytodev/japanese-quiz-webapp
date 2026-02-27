@@ -1,0 +1,13 @@
+/* ไฟล์ CSS สำหรับ custom styles เพิ่มเติม */
+/* ปัจจุบันใช้ inline styles ใน EJS แล้ว */
+/* สามารถเพิ่ม global styles ที่นี่ได้ */
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
