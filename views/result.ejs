@@ -288,6 +288,29 @@
   <div class="container overlay">
     <h1>🎊 ผลคะแนนของคุณ</h1>
     
+    <% 
+      const level = typeof locals.level !== 'undefined' ? locals.level : '';
+      let levelText = '';
+      let levelColor = '#a67c52';
+      
+      if (level === 'N5') {
+        levelText = 'ระดับ N5 (เริ่มต้น)';
+        levelColor = '#a67c52';
+      } else if (level === 'N4') {
+        levelText = 'ระดับ N4 (กลาง)';
+        levelColor = '#856d4d';
+      } else if (level === 'ALL') {
+        levelText = 'ระดับผสม (N4+N5)';
+        levelColor = '#6a5acd';
+      }
+    %>
+    
+    <% if (levelText) { %>
+      <div class="level-badge" style="background: <%= levelColor %>; color: white; padding: 8px 20px; border-radius: 20px; font-size: 1.1em; margin-bottom: 20px; display: inline-block; font-weight: 600;">
+        <%= levelText %>
+      </div>
+    <% } %>
+    
     <div class="score-circle">
       <div class="score-number"><%= score %></div>
       <div class="score-total">/ <%= total %></div>
@@ -316,6 +339,7 @@
     </div>
 
     <a href="/" class="home-btn">🏠 กลับหน้าแรก</a>
+    <a href="/game" class="home-btn" style="margin-left: 15px; background: linear-gradient(135deg, rgba(76, 175, 80, 0.8) 0%, rgba(56, 142, 60, 0.8) 100%);">🎮 เล่นอีกครั้ง</a>
   </div>
   <script>
     // ดึงคะแนนจาก URL และตั้งค่าพื้นหลัง

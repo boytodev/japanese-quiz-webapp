@@ -21,7 +21,4 @@ router.get('/dashboard', adminController.getDashboard);
 // ออกจากระบบ
 router.get('/logout', adminController.logout);
 
-// ลบข้อมูล
-router.delete('/survey/:id', adminController.deleteSurvey);
-
 module.exports = router;

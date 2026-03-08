@@ -5,11 +5,7 @@ const surveyController = require('../controllers/surveyController');
 // หน้าแรก
 router.get('/', surveyController.getIndex);
 
-// หน้าแบบสอบถาม
-router.get('/survey', surveyController.getSurvey);
-router.post('/survey', surveyController.postSurvey);
-
-// หน้าเกม
+// หน้าเกม (ข้ามแบบสอบถาม)
 router.get('/game', surveyController.getGame);
 
 // หน้าผลลัพธ์

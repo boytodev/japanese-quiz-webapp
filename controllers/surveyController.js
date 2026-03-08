@@ -1,39 +1,6 @@
-const Survey = require('../models/Survey');
-
 // แสดงหน้าแรก
 exports.getIndex = (req, res) => {
   res.render('index');
-};
-
-// แสดงหน้าแบบสอบถาม
-exports.getSurvey = (req, res) => {
-  res.render('survey');
-};
-
-// บันทึกข้อมูลแบบสอบถาม
-exports.postSurvey = async (req, res) => {
-  try {
-    const { fullname, group, school, useJapanese, phone, level } = req.body;
-    
-    const newSurvey = new Survey({
-      fullname,
-      group,
-      school: group === 'student' ? school : '',
-      useJapanese,
-      phone
-    });
-
-    await newSurvey.save();
-    res.redirect(`/game?level=${level}`);
-  } catch (error) {
-    console.error('Error saving survey:', error);
-    // In production we send generic message but log full error
-    if (process.env.NODE_ENV === 'production') {
-      res.status(500).send('เกิดข้อผิดพลาดในการบันทึกข้อมูล');
-    } else {
-      res.status(500).send(`Error saving survey: ${error.message}`);
-    }
-  }
 };
 
 // แสดงหน้าเกม
@@ -45,6 +12,7 @@ exports.getGame = (req, res) => {
 exports.getResult = (req, res) => {
   const score = parseInt(req.query.score) || 0;
   const total = parseInt(req.query.total) || 5;
+  const level = req.query.level || '';
   
   let message = '';
   const percentage = (score / total) * 100;
@@ -57,5 +25,5 @@ exports.getResult = (req, res) => {
     message = 'ควรฝึกฝนเพิ่มเติม! อย่าท้อใจ ลองเล่นอีกครั้งนะ 💪';
   }
   
-  res.render('result', { score, total, message });
+  res.render('result', { score, total, message, level });
 };
