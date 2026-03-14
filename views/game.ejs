@@ -1093,17 +1093,27 @@
       try {
         const response = await fetch('/questions.json');
         const allQuestions = await response.json();
+        const normalizedQuestions = allQuestions
+          .map(normalizeQuestion)
+          .filter(q => q.question && q.options.length > 0);
         
         // กรองคำถามตาม level
         if (selectedLevel === 'ALL') {
-          quizData = shuffleArray(allQuestions);
+          quizData = shuffleArray(normalizedQuestions);
         } else {
-          const filtered = allQuestions.filter(q => q.level === selectedLevel);
+          const filtered = normalizedQuestions.filter(q => q.level === selectedLevel);
           quizData = shuffleArray(filtered);
         }
         
         // จำกัดจำนวนคำถาม (สูงสุด 20 ข้อ)
         quizData = quizData.slice(0, Math.min(20, quizData.length));
+        
+        if (quizData.length === 0) {
+          document.getElementById('quizContainer').innerHTML =
+            '<div class="loading" style="color: #ff6b6b;">ไม่พบคำถามสำหรับระดับนี้ กรุณาลองเลือกระดับอื่น</div>';
+          document.getElementById('navButtons').style.display = 'none';
+          return;
+        }
         
         userAnswers = new Array(quizData.length).fill(null);
         
@@ -1121,6 +1131,29 @@
       }
     }
 
+    function normalizeLevel(level) {
+      return String(level || '').toUpperCase().replace(/\s+/g, '');
+    }
+
+    function normalizeQuestion(raw) {
+      const options = Array.isArray(raw.options)
+        ? raw.options
+        : [raw.option1, raw.option2, raw.option3, raw.option4];
+
+      const cleanOptions = options
+        .map(opt => String(opt || '').trim())
+        .filter(Boolean);
+
+      const answerNumber = Number(raw.answer);
+
+      return {
+        ...raw,
+        level: normalizeLevel(raw.level),
+        options: cleanOptions,
+        answer: Number.isFinite(answerNumber) ? answerNumber : 1
+      };
+    }
+
     // ฟังก์ชันสุ่มข้อมูล
     function shuffleArray(array) {
       const newArray = [...array];
@@ -1132,7 +1165,11 @@
     }
 
     function renderQuiz() {
-      if (quizData.length === 0) return;
+      if (quizData.length === 0) {
+        document.getElementById('quizContainer').innerHTML =
+          '<div class="loading" style="color: #ff6b6b;">ยังไม่มีคำถามให้แสดง</div>';
+        return;
+      }
       
       const container = document.getElementById('quizContainer');
       container.innerHTML = '';
