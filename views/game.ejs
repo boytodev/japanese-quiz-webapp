@@ -1095,7 +1095,7 @@
         const allQuestions = await response.json();
         const normalizedQuestions = allQuestions
           .map(normalizeQuestion)
-          .filter(q => q.question && q.options.length > 0);
+          .filter(q => q.question && q.options.length > 0 && q.answer >= 1 && q.answer <= q.options.length);
         
         // กรองคำถามตาม level
         if (selectedLevel === 'ALL') {
@@ -1150,7 +1150,7 @@
         ...raw,
         level: normalizeLevel(raw.level),
         options: cleanOptions,
-        answer: Number.isFinite(answerNumber) ? answerNumber : 1
+        answer: (Number.isFinite(answerNumber) && answerNumber >= 1) ? answerNumber : 0
       };
     }
 
@@ -1218,7 +1218,11 @@
         updateScoreDisplay();
       }
       
-      showFeedback(optionIndex, isCorrect);
+      try {
+        showFeedback(optionIndex, isCorrect);
+      } catch (e) {
+        console.error('showFeedback error:', e);
+      }
       
       // รอ 2 วินาที แล้วไปข้อถัดไปหรือส่งคำตอบ
       setTimeout(() => {
